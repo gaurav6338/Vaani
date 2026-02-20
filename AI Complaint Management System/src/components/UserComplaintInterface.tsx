@@ -10,7 +10,6 @@ import { Alert, AlertDescription } from './ui/alert';
 import { ImageWithFallback } from './sideUI/ImageWithFallback';
 import { 
   FileText, 
-  Upload, 
   MapPin, 
   Calendar,
   CheckCircle,
