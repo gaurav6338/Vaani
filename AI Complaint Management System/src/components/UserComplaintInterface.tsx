@@ -29,10 +29,41 @@ const categories = [
   { value: 'other', label: 'Other', icon: '📝' }
 ];
 
-export function UserComplaintInterface({ onSubmitComplaint, userComplaints }) {
+interface FormData {
+  title: string;
+  description: string;
+  category: string;
+  location: string;
+  priority: string;
+  photo: File | null;
+  photoPreview: string | ArrayBuffer | null;
+}
+
+interface Complaint {
+  id: string;
+  title: string;
+  location: string;
+  status: string;
+  submittedAt: Date;
+  department: string;
+  priority: string;
+  category: string;
+  description: string;
+  photo?: string;
+  photoPreview?: string | ArrayBuffer | null;
+  aiAnalysis?: string;
+  aiConfidence?: number;
+}
+
+interface UserComplaintInterfaceProps {
+  onSubmitComplaint: (complaint: Complaint) => void;
+  userComplaints: Complaint[];
+}
+
+export function UserComplaintInterface({ onSubmitComplaint, userComplaints }: UserComplaintInterfaceProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: '',
     description: '',
     category: '',
@@ -42,12 +73,12 @@ export function UserComplaintInterface({ onSubmitComplaint, userComplaints }) {
     photoPreview: null
   });
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field: keyof FormData, value: string | File | null) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handlePhotoUpload = (e) => {
-    const file = e.target.files[0];
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
@@ -61,7 +92,7 @@ export function UserComplaintInterface({ onSubmitComplaint, userComplaints }) {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -69,12 +100,18 @@ export function UserComplaintInterface({ onSubmitComplaint, userComplaints }) {
     await new Promise(resolve => setTimeout(resolve, 2000));
 
     // For demo, use a stock photo if no photo uploaded
-    const photoUrl = formData.photoPreview || `https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400`;
+    const photoUrl = typeof formData.photoPreview === 'string' 
+      ? formData.photoPreview 
+      : `https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400`;
 
-    const complaint = {
+    const complaint: Complaint = {
       ...formData,
       photo: photoUrl,
-      priority: formData.priority || 'medium'
+      priority: formData.priority || 'medium',
+      id: Date.now().toString(),
+      status: 'pending',
+      submittedAt: new Date(),
+      department: 'Pending Assignment'
     };
 
     onSubmitComplaint(complaint);
@@ -95,7 +132,7 @@ export function UserComplaintInterface({ onSubmitComplaint, userComplaints }) {
     setTimeout(() => setShowSuccess(false), 5000);
   };
 
-  const getStatusIcon = (status) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case 'resolved': return <CheckCircle className="h-4 w-4 text-green-600" />;
       case 'in-progress': return <Clock className="h-4 w-4 text-blue-600" />;
@@ -103,7 +140,7 @@ export function UserComplaintInterface({ onSubmitComplaint, userComplaints }) {
     }
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'resolved': return 'bg-green-100 text-green-800 border-green-200';
       case 'in-progress': return 'bg-blue-100 text-blue-800 border-blue-200';
@@ -151,7 +188,7 @@ export function UserComplaintInterface({ onSubmitComplaint, userComplaints }) {
 
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
-                <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)} required>
+                <Select value={formData.category} onValueChange={(value: string) => handleInputChange('category', value)} required>
                   <SelectTrigger>
                     <SelectValue placeholder="Select issue category" />
                   </SelectTrigger>
@@ -183,7 +220,7 @@ export function UserComplaintInterface({ onSubmitComplaint, userComplaints }) {
 
               <div className="space-y-2">
                 <Label htmlFor="priority">Priority Level</Label>
-                <Select value={formData.priority} onValueChange={(value) => handleInputChange('priority', value)}>
+                <Select value={formData.priority} onValueChange={(value: string) => handleInputChange('priority', value)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -217,11 +254,12 @@ export function UserComplaintInterface({ onSubmitComplaint, userComplaints }) {
                       accept="image/*"
                       onChange={handlePhotoUpload}
                       className="hidden"
+                      aria-label="Upload photo"
                     />
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => document.getElementById('photo').click()}
+                      onClick={() => document.getElementById('photo')?.click()}
                       className="w-full justify-center gap-2"
                     >
                       <Camera className="h-4 w-4" />
@@ -229,7 +267,7 @@ export function UserComplaintInterface({ onSubmitComplaint, userComplaints }) {
                     </Button>
                   </div>
                   
-                  {formData.photoPreview && (
+                  {formData.photoPreview && typeof formData.photoPreview === 'string' && (
                     <div className="relative w-full h-48 rounded-md overflow-hidden border">
                       <img 
                         src={formData.photoPreview} 
@@ -276,7 +314,7 @@ export function UserComplaintInterface({ onSubmitComplaint, userComplaints }) {
                   No complaints submitted yet
                 </p>
               ) : (
-                userComplaints.map(complaint => (
+                userComplaints.map((complaint: Complaint) => (
                   <div key={complaint.id} className="border rounded-lg p-4 space-y-3">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -306,7 +344,7 @@ export function UserComplaintInterface({ onSubmitComplaint, userComplaints }) {
                           <div className="flex-1">
                             <p className="text-xs text-blue-800">{complaint.aiAnalysis}</p>
                             <p className="text-xs text-blue-600 mt-1">
-                              AI Confidence: {Math.round(complaint.aiConfidence * 100)}%
+                              AI Confidence: {complaint.aiConfidence ? Math.round(complaint.aiConfidence * 100) : 0}%
                             </p>
                           </div>
                         </div>

@@ -13,9 +13,29 @@ const mockUsers = [
   { id: 'admin1', email: 'admin@city.gov', name: 'Admin User', type: 'admin' }
 ];
 
-export function AuthInterface({ onLogin }) {
+interface AuthFormData {
+  email: string;
+  password: string;
+  name: string;
+  userType: string;
+  department: string;
+}
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  type: string;
+  department?: string;
+}
+
+interface AuthInterfaceProps {
+  onLogin: (user: User, type: string) => void;
+}
+
+export function AuthInterface({ onLogin }: AuthInterfaceProps) {
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<AuthFormData>({
     email: '',
     password: '',
     name: '',
@@ -23,11 +43,11 @@ export function AuthInterface({ onLogin }) {
     department: ''
   });
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field: keyof AuthFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     if (isLogin) {
@@ -51,8 +71,8 @@ export function AuthInterface({ onLogin }) {
     }
   };
 
-  const handleDemoLogin = (userType) => {
-    const demoUsers = {
+  const handleDemoLogin = (userType: string) => {
+    const demoUsers: Record<string, User> = {
       citizen: mockUsers[0],
       department: mockUsers[1],
       admin: mockUsers[2]
@@ -66,16 +86,16 @@ export function AuthInterface({ onLogin }) {
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="flex justify-center">
-             <img src="/logo.png" alt="logo" style={{ height: '96px', width: '96px' }} className="h-12 w-12 text-primary" />
+             <img src="/logo.png" alt="logo" className="h-24 w-24 text-primary" />
           </div>
-          <h1 style={{ fontSize: '32px' }} className="text-9xl font-semibold">Vaani</h1>
+          <h1 className="text-5xl font-semibold">Vaani</h1>
           <p className="text-muted-foreground">आपकी आवाज़ सरकार तक</p>
         </div>
 
         {/* Auth Form */}
         <Card>
           <CardHeader>
-            <Tabs value={isLogin ? 'login' : 'register'} onValueChange={(value) => setIsLogin(value === 'login')}>
+            <Tabs value={isLogin ? 'login' : 'register'} onValueChange={(value: string) => setIsLogin(value === 'login')}>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login" className="flex items-center gap-2">
                   <LogIn className="h-4 w-4" />
@@ -90,7 +110,7 @@ export function AuthInterface({ onLogin }) {
           </CardHeader>
           
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} noValidate className="space-y-4">
               {!isLogin && (
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
@@ -133,7 +153,7 @@ export function AuthInterface({ onLogin }) {
                 <>
                   <div className="space-y-2">
                     <Label htmlFor="userType">User Type</Label>
-                    <Select value={formData.userType} onValueChange={(value) => handleInputChange('userType', value)}>
+                    <Select value={formData.userType} onValueChange={(value: string) => handleInputChange('userType', value)}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -163,7 +183,7 @@ export function AuthInterface({ onLogin }) {
                   {formData.userType === 'department' && (
                     <div className="space-y-2">
                       <Label htmlFor="department">Department</Label>
-                      <Select value={formData.department} onValueChange={(value) => handleInputChange('department', value)}>
+                      <Select value={formData.department} onValueChange={(value: string) => handleInputChange('department', value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select your department" />
                         </SelectTrigger>
