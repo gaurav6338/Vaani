@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { User, Building2, Shield, LogIn, UserPlus } from 'lucide-react';
 
 const mockUsers = [
-  { id: 'user1', email: 'john.doe@email.com', name: 'John Doe', type: 'citizen' },
+  { id: 'user1', email: 'gauravrai01882002@email.com', name: 'Gaurav Rai', type: 'citizen' },
   { id: 'dept1', email: 'electricity@city.gov', name: 'Sarah Wilson', type: 'department', department: 'Electricity Department' },
   { id: 'admin1', email: 'admin@city.gov', name: 'Admin User', type: 'admin' }
 ];

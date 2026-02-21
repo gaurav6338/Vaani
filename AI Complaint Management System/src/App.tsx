@@ -1,20 +1,46 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
 import { Button } from './components/ui/button';
 import { Badge } from './components/ui/badge';
 import { UserComplaintInterface } from './components/UserComplaintInterface';
 import { DepartmentDashboard } from './components/DepartmentDashboard';
 import { AdminDashboard } from './components/AdminDashboard';
 import { AuthInterface } from './components/AuthInterface';
-import { Brain, User, Building2, Shield } from 'lucide-react';
+import { User, Building2, Shield } from 'lucide-react';
+
+type AppUser = {
+  id?: string;
+  email?: string;
+  name?: string;
+  type?: string;
+  department?: string;
+};
+
+type AppComplaint = {
+  id: string;
+  userId: string;
+  userName: string;
+  title: string;
+  description: string;
+  category: string;
+  aiCategory?: string;
+  department?: string;
+  status: string;
+  priority: string;
+  location?: string;
+  photo?: string;
+  submittedAt: Date;
+  resolvedAt?: Date | null;
+  aiAnalysis?: string;
+  aiConfidence?: number;
+};
 
 // Mock data
 const mockComplaints = [
   {
     id: '1',
     userId: 'user1',
-    userName: 'John Doe',
+    userName: 'Gaurav Rai',
     title: 'Street Light Not Working',
     description: 'The street light on Oak Street has been out for 3 days, making it dangerous for pedestrians at night.',
     category: 'electricity',
@@ -31,7 +57,7 @@ const mockComplaints = [
   {
     id: '2',
     userId: 'user2',
-    userName: 'Jane Smith',
+    userName: 'khushi singh',
     title: 'Water Leak on Main Road',
     description: 'There is a significant water leak causing flooding on the main road near the shopping center.',
     category: 'water',
@@ -49,7 +75,7 @@ const mockComplaints = [
   {
     id: '3',
     userId: 'user3',
-    userName: 'Mike Johnson',
+    userName: 'yashi yadav',
     title: 'Pothole on Elm Street',
     description: 'Large pothole causing damage to vehicles and creating a safety hazard.',
     category: 'road',
@@ -74,12 +100,12 @@ const mockDepartments = [
 ];
 
 export default function App() {
-  const [complaints, setComplaints] = useState(mockComplaints);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [userType, setUserType] = useState('citizen');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [complaints, setComplaints] = useState<AppComplaint[]>(mockComplaints as AppComplaint[]);
+  const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
+  const [userType, setUserType] = useState<string>('citizen');
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
-  const handleLogin = (user, type) => {
+  const handleLogin = (user: AppUser, type: string) => {
     setCurrentUser(user);
     setUserType(type);
     setIsAuthenticated(true);
@@ -91,9 +117,9 @@ export default function App() {
     setIsAuthenticated(false);
   };
 
-  const addComplaint = (newComplaint) => {
-    const complaint = {
-      ...newComplaint,
+  const addComplaint = (newComplaint: Partial<AppComplaint>) => {
+    const complaint: AppComplaint = {
+      ...(newComplaint as AppComplaint),
       id: Date.now().toString(),
       userId: currentUser?.id || 'anonymous',
       userName: currentUser?.name || 'Anonymous User',
@@ -102,13 +128,13 @@ export default function App() {
       // AI Processing Simulation
       aiAnalysis: `AI analyzed this ${newComplaint.category} complaint and determined it requires ${newComplaint.priority} priority attention.`,
       aiConfidence: Math.random() * 0.3 + 0.7, // 0.7-1.0 confidence
-      aiCategory: newComplaint.category, // AI confirms or corrects category
-      department: getDepartmentForCategory(newComplaint.category)
+      aiCategory: newComplaint.category || '', // AI confirms or corrects category
+      department: getDepartmentForCategory(newComplaint.category || 'other')
     };
     setComplaints(prev => [complaint, ...prev]);
   };
 
-  const updateComplaintStatus = (complaintId, newStatus) => {
+  const updateComplaintStatus = (complaintId: string, newStatus: string) => {
     setComplaints(prev => prev.map(complaint => 
       complaint.id === complaintId 
         ? { 
@@ -120,8 +146,8 @@ export default function App() {
     ));
   };
 
-  const getDepartmentForCategory = (category) => {
-    const mapping = {
+  const getDepartmentForCategory = (category: string) => {
+    const mapping: Record<string, string> = {
       electricity: 'Electricity Department',
       water: 'Water Department',
       road: 'Road Maintenance',
@@ -184,9 +210,24 @@ export default function App() {
 
           <TabsContent value="citizen">
             <UserComplaintInterface 
-              onSubmitComplaint={addComplaint}
-              userComplaints={complaints.filter(c => c.userId === currentUser?.id)}
-            />
+                onSubmitComplaint={addComplaint}
+                userComplaints={complaints
+                  .filter(c => c.userId === currentUser?.id)
+                  .map(c => ({
+                    id: c.id,
+                    title: c.title,
+                    location: c.location || '',
+                    status: c.status,
+                    submittedAt: c.submittedAt,
+                    department: c.department || '',
+                    priority: c.priority,
+                    category: c.category,
+                    description: c.description || '',
+                    photo: c.photo,
+                    aiAnalysis: c.aiAnalysis,
+                    aiConfidence: c.aiConfidence
+                  }))}
+              />
           </TabsContent>
 
           <TabsContent value="department">
