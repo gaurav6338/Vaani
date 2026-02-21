@@ -9,7 +9,7 @@ import { User, Building2, Shield, LogIn, UserPlus } from 'lucide-react';
 
 const mockUsers = [
   { id: 'user1', email: 'gauravrai01882002@email.com', name: 'Gaurav Rai', type: 'citizen' },
-  { id: 'dept1', email: 'electricity@city.gov', name: 'Sarah Wilson', type: 'department', department: 'Electricity Department' },
+  { id: 'dept1', email: 'electricity@city.gov', name: 'priyanshu yadav', type: 'department', department: 'Electricity Department' },
   { id: 'admin1', email: 'admin@city.gov', name: 'Admin User', type: 'admin' }
 ];
 
@@ -56,7 +56,7 @@ export function AuthInterface({ onLogin }: AuthInterfaceProps) {
       if (user) {
         onLogin(user, user.type);
       } else {
-        alert('User not found. Try: john.doe@email.com, electricity@city.gov, or admin@city.gov');
+        alert('User not found. Try: rai.sir@email.com, electricity@city.gov, or admin@city.gov');
       }
     } else {
       // Simulate registration
