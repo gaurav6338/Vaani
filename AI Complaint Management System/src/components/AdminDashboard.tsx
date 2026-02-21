@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -18,48 +18,56 @@ import {
   LineChart,
   Line
 } from 'recharts';
-import { 
-  Shield, 
-  TrendingUp, 
-  Clock, 
-  CheckCircle, 
-  AlertTriangle,
-  Calendar,
-  FileText,
-  Building2,
-  Users,
-  Brain,
-  Download,
-  Filter
-} from 'lucide-react';
+import { Shield, TrendingUp, Clock, CheckCircle, AlertTriangle, FileText, Building2, Download, Brain } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
-export function AdminDashboard({ complaints, departments }) {
-  const [dateFilter, setDateFilter] = useState('30');
+type Dept = { id: string; name: string; complaints?: number; resolved?: number; pending?: number };
+
+type Complaint = {
+  id: string;
+  userId: string;
+  userName: string;
+  title: string;
+  description: string;
+  category: string;
+  aiCategory?: string;
+  department?: string;
+  status: string;
+  priority: string;
+  location?: string;
+  photo?: string;
+  submittedAt: Date;
+  resolvedAt?: Date | null;
+  aiAnalysis?: string;
+  aiConfidence?: number;
+};
+
+export function AdminDashboard({ complaints, departments }: { complaints: Complaint[]; departments: Dept[] }) {
+  const [dateFilter, setDateFilter] = useState<string>('30');
 
   // Calculate statistics
   const stats = useMemo(() => {
     const total = complaints.length;
-    const resolved = complaints.filter(c => c.status === 'resolved').length;
-    const pending = complaints.filter(c => c.status === 'pending').length;
-    const inProgress = complaints.filter(c => c.status === 'in-progress').length;
+    const resolved = complaints.filter((c: Complaint) => c.status === 'resolved').length;
+    const pending = complaints.filter((c: Complaint) => c.status === 'pending').length;
+    const inProgress = complaints.filter((c: Complaint) => c.status === 'in-progress').length;
     const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
 
     // Calculate average resolution time (mock data)
     const avgResolutionTime = 2.5; // days
 
     // Category breakdown
-    const categoryStats = complaints.reduce((acc, complaint) => {
+    const categoryStats = complaints.reduce<Record<string, number>>((acc, complaint: Complaint) => {
       acc[complaint.category] = (acc[complaint.category] || 0) + 1;
       return acc;
-    }, {});
+    }, {} as Record<string, number>);
 
     // Department performance
-    const departmentPerformance = departments.map(dept => {
-      const deptComplaints = complaints.filter(c => c.department === dept.name);
-      const resolved = deptComplaints.filter(c => c.status === 'resolved').length;
+    const departmentPerformance = departments.map((dept: Dept) => {
+      const deptComplaints = complaints.filter((c: Complaint) => c.department === dept.name);
+      const resolved = deptComplaints.filter((c: Complaint) => c.status === 'resolved').length;
       const rate = deptComplaints.length > 0 ? Math.round((resolved / deptComplaints.length) * 100) : 0;
       return {
         ...dept,
@@ -77,10 +85,10 @@ export function AdminDashboard({ complaints, departments }) {
     ];
 
     // Priority distribution
-    const priorityStats = complaints.reduce((acc, complaint) => {
+    const priorityStats = complaints.reduce<Record<string, number>>((acc, complaint: Complaint) => {
       acc[complaint.priority] = (acc[complaint.priority] || 0) + 1;
       return acc;
-    }, {});
+    }, {} as Record<string, number>);
 
     return {
       total,
@@ -99,13 +107,13 @@ export function AdminDashboard({ complaints, departments }) {
   // Prepare chart data
   const categoryChartData = Object.entries(stats.categoryStats).map(([category, count]) => ({
     name: category.charAt(0).toUpperCase() + category.slice(1),
-    value: count,
-    percentage: Math.round((count / stats.total) * 100)
+    value: count as number,
+    percentage: Math.round(((count as number) / stats.total) * 100)
   }));
 
   const priorityChartData = Object.entries(stats.priorityStats).map(([priority, count]) => ({
     name: priority.charAt(0).toUpperCase() + priority.slice(1),
-    value: count
+    value: count as number
   }));
 
   const generateReport = () => {
@@ -296,7 +304,7 @@ export function AdminDashboard({ complaints, departments }) {
                       dataKey="value"
                       label={({ name, percentage }) => `${name} ${percentage}%`}
                     >
-                      {categoryChartData.map((entry, index) => (
+                      {categoryChartData.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
@@ -336,7 +344,7 @@ export function AdminDashboard({ complaints, departments }) {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {stats.departmentPerformance.map((dept, index) => (
+                {stats.departmentPerformance.map((dept) => (
                   <div key={dept.id} className="border rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">

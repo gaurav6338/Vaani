@@ -187,3 +187,13 @@
 html {
   font-size: var(--font-size);
 }
+
+/* Sidebar CSS variable defaults to avoid inline styles in components */
+.sidebar-defaults {
+  --sidebar-width: 16rem;
+  --sidebar-width-icon: 3rem;
+}
+
+.sidebar-mobile {
+  --sidebar-width: 18rem;
+}

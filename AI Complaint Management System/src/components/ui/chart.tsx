@@ -196,28 +196,34 @@ function ChartTooltipContent({
                 formatter(item.value, item.name, item, index, item.payload)
               ) : (
                 <>
-                  {itemConfig?.icon ? (
+                      {itemConfig?.icon ? (
                     <itemConfig.icon />
                   ) : (
                     !hideIndicator && (
-                      <div
-                        className={cn(
-                          "shrink-0 rounded-[2px] border-(--color-border) bg-(--color-bg)",
-                          {
-                            "h-2.5 w-2.5": indicator === "dot",
-                            "w-1": indicator === "line",
-                            "w-0 border-[1.5px] border-dashed bg-transparent":
-                              indicator === "dashed",
-                            "my-0.5": nestLabel && indicator === "dashed",
-                          },
-                        )}
-                        style={
-                          {
-                            "--color-bg": indicatorColor,
-                            "--color-border": indicatorColor,
-                          } as React.CSSProperties
-                        }
-                      />
+                      // Use SVG for colored indicator instead of inline styles
+                      <svg
+                        className={cn("shrink-0", {
+                          "h-2.5 w-2.5": indicator === "dot",
+                          "w-1 h-2.5": indicator === "line",
+                          "w-3 h-2.5": indicator === "dashed",
+                          "my-0.5": nestLabel && indicator === "dashed",
+                        })}
+                        viewBox="0 0 10 10"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden
+                      >
+                        <rect
+                          x="0"
+                          y="0"
+                          width="10"
+                          height="10"
+                          rx={indicator === "dot" ? 2 : 0}
+                          fill={indicatorColor as string}
+                          stroke={indicator === "dashed" ? indicatorColor : "none"}
+                          strokeDasharray={indicator === "dashed" ? "2 2" : undefined}
+                          strokeWidth={indicator === "dashed" ? 1.5 : 0}
+                        />
+                      </svg>
                     )
                   )}
                   <div
@@ -288,23 +294,20 @@ function ChartLegendContent({
           >
             {itemConfig?.icon && !hideIcon ? (
               <itemConfig.icon />
-            ) : (
               <div
-                className="h-2 w-2 shrink-0 rounded-[2px]"
-                style={{
-                  backgroundColor: item.color,
-                }}
-              />
+                className={cn(
+                  "[&>svg]:text-muted-foreground flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3",
+                )}
+              >
+            {itemConfig?.icon && !hideIcon ? (
+              <itemConfig.icon />
+            ) : (
+              <svg className="h-2 w-2 shrink-0 rounded-[2px]" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                <rect x="0" y="0" width="10" height="10" rx="2" fill={item.color as string} />
+              </svg>
             )}
             {itemConfig?.label}
           </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// Helper to extract item config from a payload.
 function getPayloadConfigFromPayload(
   config: ChartConfig,
   payload: unknown,
